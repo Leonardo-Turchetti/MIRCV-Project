@@ -1,0 +1,22 @@
+
+body{
+    text-align: center;
+    padding: 10px;
+}
+
+img{
+    flex: 10%;
+    margin-top: 8px;
+    padding: 0 4px;
+}
+
+.results {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    padding:  0 4px;
+    margin-left: 350px;
+    height: 650px;
+    width: 55%;
+}

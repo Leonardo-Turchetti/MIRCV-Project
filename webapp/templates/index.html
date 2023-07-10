@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
+	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+    <title>Home</title>
+</head>
+<body>
+   <h1>Image similarity search</h1>
+   <form id="Form" name="Form" method="post" enctype="multipart/form-data">
+	   <div>
+		<p>Please select an image:</p>
+		<input name="query" id="query" type="file" onchange="readURL(this);" required>
+	   </div>
+	   <div id="query_res">
+			<p>Preview image:</p>
+			<img id="query_v" src="#" alt="-image" style="max-width: 250px; max-height: 250px;"/>
+	   </div>
+	  <br>
+	  <div>
+	    <input type="radio" id="knn" name="choice" value="knn" required onclick="RadioCheck()">
+	    <label for="knn">KNN search - K:</label>
+		<input type="number" name="k" id="k" style="width: 35px;" value="0"><br>
+	    <input type="radio" id="range" name="choice" value="range" onclick="RadioCheck()">
+	    <label for="range">Range search - Range:</label>
+		<input type="number" name="r" id="r" style="width: 50px;" value="0"><br><br>
+		<label>Model:</label><br>
+		<input type="radio" id="base" name="model" value="base" required>
+		<label for="base">Base</label><br>
+		<input type="radio" id="ft" name="model" value="fine_tuned">
+		<label for="ft">Fine Tuned</label><br>
+	  </div><br>
+	  <div>
+		  <input type="submit">
+	  </div>
+	</form>
+	<br>
+	<div id="res_title">
+	</div>
+	<br>
+   <div id="results" class="results">
+	<span id="source" style="display:none"></span>
+	<script type="text/javascript">
+		const Form = document.getElementById('Form');
+		PicNum = 12;	//Number of picture to show (same on utils.py)
+		Form.addEventListener('submit', function(e){
+			e.preventDefault();
+			const formData = new FormData(this);
+			// fetch('file.php'), in this case empty, cause there is flask web server 
+			// which deals with the POST requests
+			fetch('',{
+				method: "POST",
+				body: formData
+			}).then(function (response){
+				return response.text();
+			}).then(function (text){
+				//clear all the result imgs, when need to make another search
+				var parent = document.getElementById("results");
+				while(parent.firstChild){
+					parent.removeChild(parent.firstChild);
+				}
+				parent = document.getElementById("res_title");
+				while(parent.firstChild){
+					parent.removeChild(parent.firstChild);
+				}
+				const obj = JSON.parse(text);
+				console.log(obj);
+				console.log(obj.images[0]);
+				var img = new Array();
+				for(let i = 0; i < PicNum; i++){
+					img[i] = new Image();
+					img[i].src = "data:image/png;base64," + obj.images[i][1];
+					if (i == 0){
+						var h = document.createElement("H4"); 
+						var t1 = document.createTextNode("Results");
+						h.appendChild(t1);
+						document.getElementById("res_title").appendChild(h);
+					}
+					var d = document.createElement("DIV");
+					var l = document.createElement("LABEL");
+					var br = document.createElement("br");
+					var lt = document.createTextNode(obj.images[i][0])
+					l.appendChild(lt);
+					d.appendChild(img[i]);
+					d.appendChild(br);
+					d.appendChild(l);
+					document.getElementById("results").appendChild(d);
+				}
+			})
+		});
+
+		function readURL(input) {
+			if (input.files && input.files[0]) {
+				var reader = new FileReader();
+				reader.onload = function (e) {
+				$('#query_v')
+					.attr('src', e.target.result);
+				};
+				reader.readAsDataURL(input.files[0]);
+			}
+		}
+	   </script>
+<script>
+	function RadioCheck(){
+		if(!document.getElementById("knn").checked)
+			document.getElementById("k").disabled = true;
+		else
+			document.getElementById("k").disabled = false;
+		
+		if(!document.getElementById("range").checked)
+			document.getElementById("r").disabled = true;
+		else
+			document.getElementById("r").disabled = false;
+		document.getElementById("k").value = 0;
+		document.getElementById("r").value = 0;
+	}
+</script>
+   </div>
+</body>
+</html>
